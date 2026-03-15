@@ -27,12 +27,6 @@ const swaggerSpec = swaggerJsdoc({
   apis: ["./routes/*.js"],
 });
 
-try {
-  mongoose.connect(process.env.MONGO_URL);
-} catch (error) {
-  handleError(error);
-}
-
 //middleware
 app.use(express.json());
 app.use(helmet());
@@ -44,8 +38,16 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 
-app.listen(8800, () => {
-  console.log("Backend server is running!");
-});
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(8800, () => {
+      console.log(`Server is running on port 8800`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
 
 module.exports = app;
